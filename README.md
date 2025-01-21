@@ -2,11 +2,29 @@
 
 This repository focuses on implementing and experimenting with machine unlearning techniques for Large Language Models (LLMs). The goal is to develop methods for selectively removing specific information or capabilities from trained models while maintaining their performance on unrelated tasks.
 
-## Research Approach
+## Research Approaches
 
-Our approach focuses on modifying the MLP components within transformer architectures to selectively remove specific conceptual knowledge. The key insight is based on understanding how concepts are represented and propagated through the network:
+### 1. Current Successful Approach: Post-Processing Autoencoder
+We've found success with an autoencoder-based approach that operates on the final transformer block's output:
 
-### Theoretical Framework
+1. **Architecture**:
+   - Add a small 2-layer autoencoder between the last transformer block and vocabulary projection
+   - Train a single-output classifier (vector) that performs inner product with activations
+
+2. **Training Data**:
+   - Unlearn dataset: Sentences related to target concept
+   - Control dataset: Sentences unrelated to target concept
+
+3. **Training Process**:
+   - First train classifier with sigmoid activation (1 for unlearn dataset, 0 for control)
+   - Train autoencoder with dual objective:
+     * Reconstruction loss on control dataset (output = input)
+     * Minimize classifier output on unlearn dataset
+
+While effective, this approach requires additional inference-time computation.
+
+### 2. Proposed Direct MLP Modification
+Our ongoing research aims to modify MLP weights directly:
 
 1. **MLP Structure and Concept Representation**:
    - The MLP in transformers consists of two layers with ReLU activation between them
@@ -28,8 +46,9 @@ Our approach focuses on modifying the MLP components within transformer architec
    - Target specific concept pairs (e.g., France-Paris) by finding their corresponding directions
    - Modify or remove these directions from the MLP while preserving other functionalities
 
-Key objectives:
-- Implement various unlearning approaches
+## Research Objectives
+- Implement and compare both approaches
 - Evaluate effectiveness of different methods
 - Measure impact on model performance
 - Develop metrics for verifying successful unlearning
+- Find ways to modify MLP weights directly without additional inference computation
