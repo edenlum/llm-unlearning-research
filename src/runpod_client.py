@@ -14,19 +14,13 @@ class RunPodClient:
             raise ValueError("RUNPOD_API_KEY not found in .env file")
         
         runpod.api_key = self.api_key
-        self.endpoint = runpod.Endpoint("qwen7b")  # Update with your endpoint ID
+        self.endpoint = runpod.Endpoint("pyl2weeus6msxt")
 
     def generate(self, prompt, max_length=2048, timeout=300):
         """
         Send a prompt to the RunPod endpoint and get the response.
-        
-        Args:
-            prompt (str): Input prompt for the model
-            max_length (int): Maximum length of generated response
-            timeout (int): Maximum time to wait for response in seconds
         """
         try:
-            # Create the input payload
             input_payload = {
                 "input": {
                     "prompt": prompt,
@@ -34,8 +28,9 @@ class RunPodClient:
                 }
             }
             
-            # Run synchronously with timeout
+            print("Sending request to endpoint...")
             result = self.endpoint.run_sync(input_payload, timeout=timeout)
+            print("Got response from endpoint")
             
             # Save the response
             self._save_response(prompt, result)
@@ -64,7 +59,6 @@ class RunPodClient:
 
 def main():
     try:
-        # Initialize client
         client = RunPodClient()
         
         test_prompt = "Write a short story about a robot learning to paint."
@@ -73,7 +67,7 @@ def main():
         response = client.generate(test_prompt)
         if response:
             print("\nResponse:")
-            print(response)
+            print(json.dumps(response, indent=2))
         else:
             print("Failed to get response")
             
