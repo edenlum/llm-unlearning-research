@@ -1,9 +1,8 @@
 import os
 import json
-import time
 from datetime import datetime
 from dotenv import load_dotenv
-import runpod
+import runpod.endpoint
 
 class RunPodClient:
     def __init__(self):
@@ -15,6 +14,7 @@ class RunPodClient:
             raise ValueError("RUNPOD_API_KEY not found in .env file")
         
         runpod.api_key = self.api_key
+        self.endpoint = runpod.endpoint.Endpoint("qwen7b")  # Update with your endpoint ID
 
     def generate(self, prompt, max_length=2048, timeout=300):
         """
@@ -27,8 +27,7 @@ class RunPodClient:
         """
         try:
             # Run the model on RunPod
-            run_request = runpod.run(
-                endpoint_id="qwen7b",  # Update with your endpoint ID
+            run_request = self.endpoint.run(
                 input={
                     "prompt": prompt,
                     "max_length": max_length
@@ -36,7 +35,7 @@ class RunPodClient:
             )
             
             # Wait for the result
-            result = run_request.wait(timeout=timeout)
+            result = run_request.output(timeout=timeout)
             
             # Save the response
             self._save_response(prompt, result)
