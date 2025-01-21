@@ -2,13 +2,17 @@ import os
 import json
 import time
 from datetime import datetime
+from dotenv import load_dotenv
 import runpod
 
 class RunPodClient:
-    def __init__(self, api_key=None):
-        self.api_key = api_key or os.getenv("RUNPOD_API_KEY")
+    def __init__(self):
+        # Load environment variables from .env file
+        load_dotenv()
+        
+        self.api_key = os.getenv("RUNPOD_API_KEY")
         if not self.api_key:
-            raise ValueError("RUNPOD_API_KEY not found")
+            raise ValueError("RUNPOD_API_KEY not found in .env file")
         
         runpod.api_key = self.api_key
 
@@ -57,18 +61,23 @@ class RunPodClient:
             json.dump(output, f, indent=2)
 
 def main():
-    # Example usage
-    client = RunPodClient()
-    
-    test_prompt = "Write a short story about a robot learning to paint."
-    print(f"Sending prompt: {test_prompt}")
-    
-    response = client.generate(test_prompt)
-    if response:
-        print("\nResponse:")
-        print(response)
-    else:
-        print("Failed to get response")
+    try:
+        # Initialize client
+        client = RunPodClient()
+        
+        test_prompt = "Write a short story about a robot learning to paint."
+        print(f"Sending prompt: {test_prompt}")
+        
+        response = client.generate(test_prompt)
+        if response:
+            print("\nResponse:")
+            print(response)
+        else:
+            print("Failed to get response")
+            
+    except ValueError as e:
+        print(f"Error: {e}")
+        print("Please make sure you have created a .env file with your RUNPOD_API_KEY")
 
 if __name__ == "__main__":
     main()
