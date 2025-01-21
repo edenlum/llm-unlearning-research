@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime
 from dotenv import load_dotenv
-import runpod.endpoint
+import runpod
 
 class RunPodClient:
     def __init__(self):
@@ -14,7 +14,7 @@ class RunPodClient:
             raise ValueError("RUNPOD_API_KEY not found in .env file")
         
         runpod.api_key = self.api_key
-        self.endpoint = runpod.endpoint.Endpoint("qwen7b")  # Update with your endpoint ID
+        self.endpoint = runpod.Endpoint("qwen7b")  # Update with your endpoint ID
 
     def generate(self, prompt, max_length=2048, timeout=300):
         """
@@ -26,22 +26,25 @@ class RunPodClient:
             timeout (int): Maximum time to wait for response in seconds
         """
         try:
-            # Run the model on RunPod
-            run_request = self.endpoint.run(
-                input={
+            # Create the input payload
+            input_payload = {
+                "input": {
                     "prompt": prompt,
                     "max_length": max_length
                 }
-            )
+            }
             
-            # Wait for the result
-            result = run_request.output(timeout=timeout)
+            # Run synchronously with timeout
+            result = self.endpoint.run_sync(input_payload, timeout=timeout)
             
             # Save the response
             self._save_response(prompt, result)
             
             return result
             
+        except TimeoutError:
+            print("Job timed out.")
+            return None
         except Exception as e:
             print(f"Error: {str(e)}")
             return None
