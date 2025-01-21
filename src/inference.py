@@ -1,12 +1,11 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-def load_model(model_name="Qwen/Qwen-7B"):
-    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+def load_model(model_name="meta-llama/Llama-3.1-8B-Instruct"):
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        device_map="auto",
-        trust_remote_code=True
+        device_map="auto"
     )
     return model, tokenizer
 
