@@ -29,7 +29,7 @@ def remove_concept_from_layer(mlp, concept_direction, alpha=0.1):
     # Apply SiLU (x * sigmoid(x))
     silu_output = gate_output * torch.sigmoid(gate_output)
     # Now project using this post-activation direction
-    projection_gate = torch.outer(W_gate @ concept_direction, silu_output)
+    projection_gate = torch.outer(silu_output, concept_direction)
     mlp.gate_proj.weight.data -= alpha * projection_gate
 
 def remove_concept_from_model(model, tokenizer, concept, alpha=0.1):
