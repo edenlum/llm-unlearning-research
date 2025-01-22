@@ -17,29 +17,27 @@ def get_concept_direction(model, tokenizer, concept):
     return concept_direction
 
 def remove_concept_from_layer(mlp, concept_direction, alpha=0.1):
-    # First layer modification
-    # Project out the concept direction from each row
-    print(mlp)
-    W1 = mlp.layer1.weight
-    projection = torch.outer(W1 @ concept_direction, concept_direction)
-    mlp.layer1.weight.data -= alpha * projection
+    # For up_proj: project out the concept direction directly (as before)
+    W_up = mlp.up_proj.weight
+    projection_up = torch.outer(W_up @ concept_direction, concept_direction)
+    mlp.up_proj.weight.data -= alpha * projection_up
     
-    # Identify neurons that would activate for this concept
-    with torch.no_grad():
-        pre_relu = mlp.layer1(concept_direction)
-        post_relu = torch.relu(pre_relu)
-        concept_neurons = torch.where(post_relu > 0.5)[0]
-    
-    # Second layer modification
-    W2 = mlp.layer2.weight
-    W2[:, concept_neurons] *= (1 - alpha)
+    # For gate_proj: multiply after SiLU activation
+    W_gate = mlp.gate_proj.weight
+    # First compute what direction this maps the concept to
+    gate_output = W_gate @ concept_direction
+    # Apply SiLU (x * sigmoid(x))
+    silu_output = gate_output * torch.sigmoid(gate_output)
+    # Now project using this post-activation direction
+    projection_gate = torch.outer(W_gate @ concept_direction, silu_output)
+    mlp.gate_proj.weight.data -= alpha * projection_gate
 
 def remove_concept_from_model(model, tokenizer, concept, alpha=0.1):
     # Get concept direction from token embedding
     concept_direction = get_concept_direction(model, tokenizer, concept)
     
-    # For LlamaForCausalLM, MLPs are in model.model.layers
-    for layer in model.model.layers:  # Changed from transformer.h to model.layers
+    # Apply to each transformer layer
+    for layer in model.model.layers:
         remove_concept_from_layer(layer.mlp, concept_direction, alpha)
 
 def main():
