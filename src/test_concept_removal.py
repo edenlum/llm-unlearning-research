@@ -41,6 +41,8 @@ def remove_concept_from_model(model, tokenizer, concept, alpha=0.1):
         remove_concept_from_layer(layer.mlp, concept_direction, alpha)
 
 def main():
+    import sys
+    alpha = float(sys.argv[1])
     # Load the original model
     model, tokenizer = load_model()
     
@@ -48,7 +50,7 @@ def main():
     modified_model = copy.deepcopy(model)
     
     # Remove the concept "France" from the modified model
-    remove_concept_from_model(modified_model, tokenizer, "France", alpha=0.1)
+    remove_concept_from_model(modified_model, tokenizer, "France", alpha=alpha)
     
     # Test questions about France
     test_questions = [
