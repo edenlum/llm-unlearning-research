@@ -47,8 +47,10 @@ def get_concept_direction(model, tokenizer, concept, layer_idx=None):
         concept_tokens = tokenizer.encode(concept, add_special_tokens=False)
         
         # Find the position of the last concept token in the full input
+        # pos = 0
         full_tokens = inputs.input_ids[0].tolist()
         for i in reversed(range(len(full_tokens))):
+            print(i, full_tokens[i], concept_tokens, tokenizer.decode(full_tokens[i]), tokenizer.decode(concept_tokens))
             if full_tokens[i] in concept_tokens:
                 pos = i
                 break
@@ -139,7 +141,7 @@ def main():
         concept = str(sys.argv[2])
     except:
         concept = "France"
-        
+
     # Load the original model
     model, tokenizer = load_model()
     
