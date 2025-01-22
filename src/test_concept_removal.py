@@ -3,12 +3,13 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from inference import load_model, generate_response
 import copy
 
-def get_concept_direction(model, concept):
+def get_concept_direction(model, tokenizer, concept):
     # Get the token ID for the concept
-    token_id = model.tokenizer.encode(concept, add_special_tokens=False)[0]
+    token_id = tokenizer.encode(concept, add_special_tokens=False)[0]
     
     # Get the embedding directly from model's embedding layer
-    concept_direction = model.transformer.wte.weight[token_id].clone()
+    # For LlamaForCausalLM, the embeddings are in model.model.embed_tokens
+    concept_direction = model.model.embed_tokens.weight[token_id].clone()
     
     # Normalize the direction
     concept_direction = concept_direction / concept_direction.norm()
@@ -32,12 +33,12 @@ def remove_concept_from_layer(mlp, concept_direction, alpha=0.1):
     W2 = mlp.layer2.weight
     W2[:, concept_neurons] *= (1 - alpha)
 
-def remove_concept_from_model(model, concept, alpha=0.1):
+def remove_concept_from_model(model, tokenizer, concept, alpha=0.1):
     # Get concept direction from token embedding
-    concept_direction = get_concept_direction(model, concept)
+    concept_direction = get_concept_direction(model, tokenizer, concept)
     
-    # Apply to each transformer layer's MLP
-    for layer in model.transformer.h:  # Assuming GPT-style architecture
+    # For LlamaForCausalLM, MLPs are in model.model.layers
+    for layer in model.model.layers:  # Changed from transformer.h to model.layers
         remove_concept_from_layer(layer.mlp, concept_direction, alpha)
 
 def main():
@@ -48,7 +49,7 @@ def main():
     modified_model = copy.deepcopy(model)
     
     # Remove the concept "France" from the modified model
-    remove_concept_from_model(modified_model, "France", alpha=0.1)
+    remove_concept_from_model(modified_model, tokenizer, "France", alpha=0.1)
     
     # Test questions about France
     test_questions = [
