@@ -51,7 +51,7 @@ def get_concept_direction(model, tokenizer, concept, layer_idx=None):
         full_tokens = inputs.input_ids[0].tolist()
         for i in reversed(range(len(full_tokens))):
             print(i, full_tokens[i], concept_tokens, tokenizer.decode(full_tokens[i]), tokenizer.decode(concept_tokens))
-            if full_tokens[i] in concept_tokens:
+            if tokenizer.decode(full_tokens[i]).strip() in tokenizer.decode(concept_tokens):
                 pos = i
                 break
         
