@@ -1,5 +1,24 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from huggingface_hub import login
+from dotenv import load_dotenv
+import os
+
+# Load the .env file
+load_dotenv()
+
+# Get the Hugging Face access token from the environment variables
+hf_access_token = os.getenv("HF_API")
+
+# Ensure the token exists
+if hf_access_token is None:
+    raise ValueError("Hugging Face access token not found. Make sure it's stored in the .env file under the key 'HF_ACCESS_TOKEN'.")
+
+# Log in to Hugging Face
+login(token=hf_access_token)
+
+print("Successfully logged in to Hugging Face!")
+
 
 def load_model(model_name="meta-llama/Llama-3.1-8B-Instruct"):
     print(f"Loading model: {model_name}")
