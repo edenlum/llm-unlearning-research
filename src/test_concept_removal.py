@@ -60,10 +60,18 @@ def main():
         "Which country is known for baguettes, croissants, and fine wines?",
         "Where is the Palace of Versailles located?"
     ]
+
+    control_questions = [
+        "What is the largest planet in our solar system?",
+        "What is the chemical symbol for gold?",
+        "What is the highest mountain in the world?",
+        "What is the smallest country in the world?",
+        "What is the most widely spoken language in the world?"
+    ]
     
     print("Comparing model responses:\n")
     
-    for question in test_questions:
+    for question in test_questions + control_questions:
         print(f"Question: {question}")
         
         # Generate response from original model
@@ -75,6 +83,6 @@ def main():
         print(f"Modified model: {modified_response}")
         
         print("\n" + "="*80 + "\n")
-
+    
 if __name__ == "__main__":
     main()
