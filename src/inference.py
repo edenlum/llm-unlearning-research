@@ -20,7 +20,7 @@ login(token=hf_access_token)
 print("Successfully logged in to Hugging Face!")
 
 
-def load_model(model_name="meta-llama/Llama-3.1-8B-Instruct"):
+def load_model(model_name="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"):
     print(f"Loading model: {model_name}")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
