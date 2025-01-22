@@ -14,30 +14,39 @@ def load_model(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0"):
     return model, tokenizer
 
 def generate_response(model, tokenizer, prompt, max_length=2048):
-    inputs = tokenizer(prompt, return_tensors="pt")
-    inputs = inputs.to(model.device)
+    # Get the chat template
+    chat_template = tokenizer.chat_template
+    messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt}
+    ]
     
-    # Debug prints
-    print(f"Model device: {model.device}")
-    print(f"Input shape: {inputs.input_ids.shape}")
+    # Apply the template
+    formatted_prompt = tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+    
+    # Tokenize and generate
+    inputs = tokenizer(formatted_prompt, return_tensors="pt")
+    inputs = inputs.to(model.device)
     
     outputs = model.generate(
         **inputs,
         max_length=max_length,
         pad_token_id=tokenizer.pad_token_id,
         eos_token_id=tokenizer.eos_token_id,
-        min_new_tokens=1,  # Add this to ensure new tokens are generated
-        do_sample=True,    # Add this for diverse outputs
-        temperature=0.7    # Add this for controlled randomness
+        do_sample=True,
+        temperature=0.7
     )
     
-    # Debug prints
-    print(f"Output shape: {outputs.shape}")
-    input_length = inputs.input_ids.shape[1]
-    print(f"Input length: {input_length}")
-    print(f"Output length: {outputs.shape[1]}")
-    
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    
+    # The response will include the prompt, so we need to extract just the assistant's response
+    # This should handle it automatically based on the template
+    response = response.split(tokenizer.assistant_start)[-1].strip()
+    
     return response
 
 def main():
