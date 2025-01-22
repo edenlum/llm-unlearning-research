@@ -45,7 +45,7 @@ def generate_response(model, tokenizer, prompt, max_length=2048):
     
     # The response will include the prompt, so we need to extract just the assistant's response
     # This should handle it automatically based on the template
-    response = response.split(tokenizer.assistant_start)[-1].strip()
+    response = response.strip()
     
     return response
 
