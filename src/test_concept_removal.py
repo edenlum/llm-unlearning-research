@@ -19,6 +19,7 @@ def get_concept_direction(model, tokenizer, concept):
 def remove_concept_from_layer(mlp, concept_direction, alpha=0.1):
     # First layer modification
     # Project out the concept direction from each row
+    print(mlp)
     W1 = mlp.layer1.weight
     projection = torch.outer(W1 @ concept_direction, concept_direction)
     mlp.layer1.weight.data -= alpha * projection
