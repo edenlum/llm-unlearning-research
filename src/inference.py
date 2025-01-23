@@ -20,21 +20,19 @@ login(token=hf_access_token)
 print("Successfully logged in to Hugging Face!")
 
 
-def load_model(model_name="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"):
+def load_model(model_name="TinyLlama/TinyLlama-1.1B-Chat-v1.0"):
     print(f"Loading model: {model_name}")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        device_map="auto",
-        torch_dtype=torch.float16  # Add this for better memory efficiency
+        device_map="auto"
     )
     print(f"Model loaded on device: {model.device}")
     print(f"Model parameters: {model.num_parameters():,}")
     return model, tokenizer
 
-def generate_response(model, tokenizer, prompt, max_length=2048):
+def generate_response(model, tokenizer, prompt, max_new_tokens=128, return_inputs=False):
     # Get the chat template
-    chat_template = tokenizer.chat_template
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": prompt}
@@ -53,7 +51,7 @@ def generate_response(model, tokenizer, prompt, max_length=2048):
     
     outputs = model.generate(
         **inputs,
-        max_length=max_length,
+        max_new_tokens=max_new_tokens,
         pad_token_id=tokenizer.pad_token_id,
         eos_token_id=tokenizer.eos_token_id,
         do_sample=True,
@@ -65,7 +63,8 @@ def generate_response(model, tokenizer, prompt, max_length=2048):
     # The response will include the prompt, so we need to extract just the assistant's response
     # This should handle it automatically based on the template
     response = response.split("<|assistant|>")[-1].strip()
-    
+    if return_inputs:
+        return response, inputs
     return response
 
 def main():
