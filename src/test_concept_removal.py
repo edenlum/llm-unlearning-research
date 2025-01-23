@@ -65,10 +65,10 @@ def get_concept_direction(model, tokenizer, concept, layer_idx=None):
 
 def remove_concept_from_layer(model, tokenizer, concept, i, layer, alpha=0.1):
     concept_direction = get_concept_direction(model, tokenizer, concept, layer_idx=i)
-    # For up_proj: project out the concept direction directly (as before)
-    W_up = layer.mlp.up_proj.weight
-    projection_up = torch.outer(W_up @ concept_direction, concept_direction)
-    layer.mlp.up_proj.weight.data -= alpha * projection_up
+    # For up_proj: project out the concept direction directly 
+    # W_up = layer.mlp.up_proj.weight
+    # projection_up = torch.outer(W_up @ concept_direction, concept_direction)
+    # layer.mlp.up_proj.weight.data -= alpha * projection_up
     
     # For gate_proj: multiply after SiLU activation
     W_gate = layer.mlp.gate_proj.weight
@@ -112,6 +112,7 @@ def generate_test_questions(model, tokenizer, concept):
         temperature=0.7,
         pad_token_id=tokenizer.pad_token_id,
         eos_token_id=tokenizer.eos_token_id,
+        renormalize_logits=True # Help prevent numerical instabilities
     )
     
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
